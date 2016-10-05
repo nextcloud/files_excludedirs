@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<info>
+	<id>files_excludedirs</id>
+	<name>Exclude directories</name>
+	<description>Exclude certain directories</description>
+	<licence>AGPL</licence>
+	<author>Roeland Jago Douma</author>
+	<version>0.0.1</version>
+	<dependencies>
+		<owncloud min-version="9.2" max-version="9.2" />
+	</dependencies>
+	<types>
+		<filesystem/>
+	</types>
+</info>
