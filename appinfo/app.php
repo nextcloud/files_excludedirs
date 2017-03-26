@@ -20,6 +20,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
 $manager = new \OCA\Files_ExcludeDirs\Wrapper\Manager();
 
 OCP\Util::connectHook('OC_Filesystem', 'preSetup', $manager, 'setupStorageWrapper');

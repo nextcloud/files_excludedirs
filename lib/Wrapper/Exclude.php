@@ -20,9 +20,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\Files_ExcludeDirs\Wrapper;
 
+use Icewind\Streams\IteratorDirectory;
 use OC\Files\Storage\Wrapper\Wrapper;
+use Webmozart\Glob\Glob;
 
 class Exclude extends Wrapper {
 	/**
@@ -49,24 +52,61 @@ class Exclude extends Wrapper {
 			return false;
 		}
 
-		foreach ($this->exclude as $dir) {
-			if (strpos($path, $dir) !== false) {
-				return true;
+		foreach ($this->exclude as $rule) {
+			// glob requires all paths to be absolute so we put /'s in front of them
+			if (strpos($rule, '/') !== false) {
+				$rule = '/' . rtrim($rule, '/');
+				return Glob::match('/' . $path, $rule);
+			} else {
+				$parts = explode('/', $path);
+				$rule = '/' . $rule;
+				foreach ($parts as $part) {
+					if (Glob::match('/' . $part, $rule)) {
+						return true;
+					}
+				}
 			}
 		}
 
 		return false;
 	}
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function opendir($path) {
+	public function file_exists($path) {
 		if ($this->excludedPath($path)) {
 			return false;
 		}
 
-		return $this->storage->opendir($path);
+		return parent::file_exists($path);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function opendir($path) {
+		$directoryIterator = $this->iterateDirectory($path);
+
+		if ($directoryIterator) {
+			$filteredDirectory = new \CallbackFilterIterator($directoryIterator, function ($name) use ($path) {
+				return !$this->excludedPath($path . '/' . $name);
+			});
+			$filteredDirectory->rewind();
+			return IteratorDirectory::wrap($filteredDirectory);
+		}
+
+		return false;
+	}
+
+	private function iterateDirectory($path) {
+		if ($this->excludedPath($path)) {
+			return false;
+		}
+
+		$handle = $this->storage->opendir($path);
+		while ($file = readdir($handle)) {
+			if ($file !== '.' && $file !== '..') {
+				yield $file;
+			}
+		}
 	}
 
 	/**

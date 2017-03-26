@@ -1,0 +1,5 @@
+{
+    "require": {
+        "webmozart/glob": "^4.1"
+    }
+}
