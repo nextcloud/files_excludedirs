@@ -21,8 +21,9 @@
  *
  */
 
+use OCA\Files_ExcludeDirs\AppInfo\Application;
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$manager = new \OCA\Files_ExcludeDirs\Wrapper\Manager();
-
-OCP\Util::connectHook('OC_Filesystem', 'preSetup', $manager, 'setupStorageWrapper');
+$app = new Application();
+$app->register();

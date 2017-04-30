@@ -20,16 +20,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\Files_ExcludeDirs\Wrapper;
 
 use OC\Files\Filesystem;
 use OC\Files\Storage\Storage;
+use OCP\IConfig;
 
 class Manager {
+	/** @var IConfig */
+	private $config;
+
+	public function __construct(IConfig $config) {
+		$this->config = $config;
+	}
 
 	public function setupStorageWrapper() {
 		Filesystem::addStorageWrapper('exclude', function ($mountPoint, Storage $storage) {
-			return new Exclude(['storage' => $storage, 'exclude' => ['.snapshot']]);
+			$exclude = json_decode(
+				$this->config->getAppValue('files_excludedirs', 'exclude', '[".snapshot"]')
+			);
+			return new Exclude(['storage' => $storage, 'exclude' => $exclude]);
 		});
 	}
 }
