@@ -56,7 +56,9 @@ class Exclude extends Wrapper {
 			// glob requires all paths to be absolute so we put /'s in front of them
 			if (strpos($rule, '/') !== false) {
 				$rule = '/' . rtrim($rule, '/');
-				return Glob::match('/' . $path, $rule);
+				if(Glob::match('/' . $path, $rule)) {
+					return true;
+				}
 			} else {
 				$parts = explode('/', $path);
 				$rule = '/' . $rule;
