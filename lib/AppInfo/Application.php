@@ -21,29 +21,22 @@
 
 namespace OCA\Files_ExcludeDirs\AppInfo;
 
-use OCA\Files_ExcludeDirs\Wrapper\Manager;
-use OCA\Provisioning_API\UserInfo\UserInfoManager;
+use OCA\Files_ExcludeDirs\Listener\BeforeFileSystemSetupListener;
 use OCP\AppFramework\App;
-use OCP\AppFramework\IAppContainer;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Files\Events\BeforeFileSystemSetupEvent;
 
-class Application extends App {
+class Application extends App implements IBootstrap {
 	public function __construct(array $urlParams = []) {
 		parent::__construct('files_excludedirs', $urlParams);
-
-		$container = $this->getContainer();
-
-		$container->registerService(Manager::class, function (IAppContainer $c) {
-			$server = $c->getServer();
-			return new Manager(
-				$server->getConfig()
-			);
-		});
 	}
 
-	public function register() {
-		$container = $this->getContainer();
-		$manager = $container->query(Manager::class);
+	public function register(IRegistrationContext $context): void {
+		$context->registerEventListener(BeforeFileSystemSetupEvent::class, BeforeFileSystemSetupListener::class);
+	}
 
-		\OCP\Util::connectHook('OC_Filesystem', 'preSetup', $manager, 'setupStorageWrapper');
+	public function boot(IBootContext $context): void {
 	}
 }
