@@ -25,13 +25,14 @@ namespace OCA\Files_ExcludeDirs\Wrapper;
 
 use Icewind\Streams\IteratorDirectory;
 use OC\Files\Storage\Wrapper\Wrapper;
+use Override;
 use Webmozart\Glob\Glob;
 
 class Exclude extends Wrapper {
 	/**
 	 * @var string[] Directories to exclude
 	 */
-	private $exclude;
+	private array $exclude;
 
 	/**
 	 * @param array $parameters
@@ -42,12 +43,9 @@ class Exclude extends Wrapper {
 	}
 
 	/**
-	 * Check if the path contains an ignored direcotry
-	 *
-	 * @param string $path
-	 * @return bool
+	 * Check if the path contains an ignored directory.
 	 */
-	private function excludedPath($path) {
+	private function excludedPath(string $path): bool {
 		if ($path === '') {
 			return false;
 		}
@@ -71,7 +69,7 @@ class Exclude extends Wrapper {
 		return false;
 	}
 
-	public function file_exists($path) {
+	public function file_exists(string $path): bool {
 		if ($this->excludedPath($path)) {
 			return false;
 		}
@@ -96,8 +94,8 @@ class Exclude extends Wrapper {
 		return false;
 	}
 
-	private function iterateDirectory($path) {
-		if ($this->excludedPath($path)) {
+	private function iterateDirectory(string $path): false|\Generator {
+		if (!$this->excludedPath($path)) {
 			return false;
 		}
 
@@ -109,11 +107,8 @@ class Exclude extends Wrapper {
 		}
 	}
 
-	/**
-	 * {@inheritdoc}
-	 * Todo: throw forbiddenexception??
-	 */
-	public function getMetaData($path) {
+	#[Override]
+	public function getMetaData(string $path): ?array {
 		if ($this->excludedPath($path)) {
 			return null;
 		}
